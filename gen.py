@@ -4,6 +4,10 @@ import random
 import string
 import typer
 import time
+import importlib
+from importlib import import_module
+from extentions import formats
+from extentions import schemas
 from pathlib import Path
 
 class Format:
@@ -28,61 +32,30 @@ class Schema:
     def EPOC(self):
         return round(time.time() * 1000)
 
-class CSV(Format):
-    def output(self, record:dict):
-        keys = record.keys()
-        return f"{','.join(str(x) for x in keys)}", f"{','.join(str(record[x]) for x in keys)}"
 
-class Pinot(Schema):
-    def gen(self, schema:str, formatter, limit):
-        s:dict = json.loads(schema)
-        self.schema_name = s['schemaName']
-        self.dimensions = s['dimensionFieldSpecs']
-        self.metrics = s['metricFieldSpecs']
-        self.datetimes = s['dateTimeFieldSpecs']
-        self.keys = s['primaryKeyColumns']
-
-        records = []
-        for i in range(limit):
-            rec = {}
-            is_array = bool(x["singleValueField"] if "singleValueField" in s.keys() else False)
-            for x in self.dimensions:
-                rec[x['name']] = getattr(self, x['dataType'].upper())()
-
-            for x in self.metrics:
-                rec[x['name']] = getattr(self, x['dataType'].upper())()
-
-            for x in self.datetimes:
-                rec[x['name']] = self.EPOC()
-
-            for x in self.keys:
-                # d = self.dimensions[x]
-                rec[x] = self.ID()
-
-            cols, rf = formatter(rec)
-            records.append(rf)
-
-        return cols, records
+def load(name:str, path:str):
+    mod = __import__(path, fromlist=[name])
+    inst = getattr(getattr(mod, name), name)
+    return inst()
 
 
-formats = {
-    "csv": CSV().output
-}
-schemas = {
-    "pinot": Pinot().gen
-}
+def load_format(name:str, path:str="extentions.formats"):
+    return load(name, path).output
+
+def load_schema(name:str, path:str="extentions.schemas"):
+    return load(name, path).gen
 
 app = typer.Typer()
 @app.command()
-def mock(schema_file:str, schema_type:str="pinot", format:str="csv", limit:int=100):
+def mock(schema_file:str="schemas/pinot.json", schema_type:str="Pinot", format:str="CSV", limit:int=100):
     """
     Generate data
     """
     f = open(schema_file, "r")
     schema = f.read()
 
-    formatter = formats[format]
-    generator = schemas[schema_type]
+    formatter = load_format(format)
+    generator = load_schema(schema_type)
     cols, records = generator(schema, formatter, limit)
 
     print(cols)
