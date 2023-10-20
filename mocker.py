@@ -43,7 +43,7 @@ def load_schema(name:str, path:str="extentions.schemas"):
 
 app = typer.Typer()
 @app.command()
-def mock(schema_file:str, schema_type:str, format:str="JSON", output_file:str="output", limit:int=100):
+def mock(schema_file:str, schema_type:str, format:str="JSON", limit:int=100):
     """
     Generate data
 
