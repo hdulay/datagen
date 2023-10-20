@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python mocker.py
 import random
 import string
 import typer
@@ -54,9 +54,6 @@ def mock(schema_file:str, schema_type:str, format:str="JSON", output_file:str="o
 
     generator = load_schema(schema_type)
     records = generator(schema, limit)
-
-    # if not os.path.exists(output_dir):
-    #     os.makedirs(output_dir)
 
     df = pd.DataFrame.from_records(records)
     writer = load_writer(format)

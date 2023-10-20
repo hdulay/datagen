@@ -2,10 +2,12 @@
 from mocker import Writer
 import pandas as pd
 
-class CSV(Writer):
+
+class OUT(Writer):
 
     def __init__(self) -> None:
         super().__init__()
 
     def output(self, df:pd.DataFrame):
-        df.to_csv(f'data.csv')
+        print(df.to_json(orient='records', lines=True))
+    

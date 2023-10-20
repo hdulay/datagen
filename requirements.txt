@@ -4,3 +4,4 @@ pandas_flavor
 pyarrow
 numpy
 avro
+avro-gen3
