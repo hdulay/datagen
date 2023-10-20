@@ -6,10 +6,6 @@ import pandas as pd
 
 class JSON(Schema):
     def gen(self, schema:str, limit):
-
-
-        js.
-
         s:dict = json.loads(schema)
         self.schema_name = s['schemaName']
         self.dimensions = s['dimensionFieldSpecs']
