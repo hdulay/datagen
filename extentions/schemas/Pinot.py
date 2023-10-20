@@ -1,9 +1,10 @@
 from gen import Schema
 import json
+import pandas as pd
 
 
 class Pinot(Schema):
-    def gen(self, schema:str, formatter, limit):
+    def gen(self, schema:str, limit):
         s:dict = json.loads(schema)
         self.schema_name = s['schemaName']
         self.dimensions = s['dimensionFieldSpecs']
@@ -31,10 +32,6 @@ class Pinot(Schema):
 
             for x in self.datetimes:
                 rec[x['name']] = self.EPOC()
+            records.append(rec)
 
-            
-
-            cols, rf = formatter(rec)
-            records.append(rf)
-
-        return cols, records
+        return records

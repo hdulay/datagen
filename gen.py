@@ -1,21 +1,18 @@
 #!/usr/bin/env python
-import json
 import random
 import string
 import typer
 import time
-import importlib
-from importlib import import_module
-from extentions import formats
-from extentions import schemas
-from pathlib import Path
+import pandas as pd
 
-class Format:
-    def output(self, records:dict): str
+class Writer:
+    def output(self, df:pd.DataFrame):
+        pass
 
 class Schema:
 
-    def gen(self, schema:str, formatter:Format, limit:int) -> []:dict
+    def gen(self, schema:str, limit:int) -> []:
+        pass
 
     def STRING(self) -> str: 
         return ''.join(random.choices(string.ascii_uppercase, k=10))
@@ -38,8 +35,7 @@ def load(name:str, path:str):
     inst = getattr(getattr(mod, name), name)
     return inst()
 
-
-def load_format(name:str, path:str="extentions.formats"):
+def load_writer(name:str, path:str="extentions.formats") -> Writer:
     return load(name, path).output
 
 def load_schema(name:str, path:str="extentions.schemas"):
@@ -47,20 +43,25 @@ def load_schema(name:str, path:str="extentions.schemas"):
 
 app = typer.Typer()
 @app.command()
-def mock(schema_file:str="schemas/pinot.json", schema_type:str="Pinot", format:str="CSV", limit:int=100):
+def mock(schema_file:str, schema_type:str, format:str="JSON", output_file:str="output", limit:int=100):
     """
     Generate data
+
+    --format other options are CSV, AVRO, protobuf
     """
     f = open(schema_file, "r")
     schema = f.read()
 
-    formatter = load_format(format)
     generator = load_schema(schema_type)
-    cols, records = generator(schema, formatter, limit)
+    records = generator(schema, limit)
 
-    print(cols)
-    for r in records:
-        print(r)
+    # if not os.path.exists(output_dir):
+    #     os.makedirs(output_dir)
+
+    df = pd.DataFrame.from_records(records)
+    writer = load_writer(format)
+    writer(df)
+    
 
 if __name__ == "__main__":
     app()

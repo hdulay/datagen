@@ -1,2 +1,6 @@
 typer
-csv
+pandas
+pandas_flavor
+pyarrow
+numpy
+avro
