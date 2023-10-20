@@ -165,4 +165,3 @@ data*
 *.parquet
 *.avro
 *.proto
-*.json
